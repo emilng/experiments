@@ -36,7 +36,6 @@ function createCircle(x, y) {
 		.on('pointerupoutside', onDragEnd)
 		.on('pointermove', onDragMove);
 
-	// move to top left corner of screen
 	circle.x = x;
 	circle.y = y;
 
