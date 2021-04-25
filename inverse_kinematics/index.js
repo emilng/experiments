@@ -2,31 +2,35 @@ import * as PIXI from 'pixi.js';
 import Circle from './circle.js';
 import Line from './line.js';
 
+let linkLength = 50;
 const branchLength = document.getElementById('branchLength');
+branchLength.value = linkLength;
 
 const app = new PIXI.Application({ backgroundColor: 0xbbbbbb });
 const viewport = document.getElementById('viewport');
 viewport.appendChild(app.view);
 
+const circleRadius = 10;
 const startX = 400;
-const startY = 40;
-let linkLength = 100;
-
+const startY = 300;
+const joints = 5;
 const circles = [];
 const lines = [];
 
 const target = new Circle(app, {
+  radius: circleRadius,
 	x: startX,
-	y: 500,
+	y: ((joints - 1) * linkLength) + startY + 50,
 	color: 0xff0000,
 	draggable: true,
 	onUpdate() {},
 });
 
 // create joints
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < joints; i++) {
 	circles.push(new Circle(app, {
-		x: 400,
+    radius: circleRadius,
+		x: startX,
 		y: (i * linkLength) + startY,
 		draggable: false,
 		color: 0x555555,
@@ -35,8 +39,9 @@ for (let i = 0; i < 5; i++) {
 }
 
 const reachableTarget = new Circle(app, {
+  radius: circleRadius,
 	x: startX,
-	y: 440,
+	y: ((joints - 1) * linkLength) + startY,
 	color: 0x0000ff,
 	draggable: false,
 	onUpdate() {},
@@ -85,9 +90,10 @@ function updateTarget(x, y) {
 		reachableTarget.x = x;
 		reachableTarget.y = y;
 	} else {
-		const angle = Math.acos((x - x1) / targetDistance);
-		reachableTarget.x = firstCircle.x + (Math.cos(angle) * maxReach);
-		reachableTarget.y = firstCircle.y + (Math.sin(angle) * maxReach);
+		const xAngle = Math.acos((x - x1) / targetDistance);
+    const yAngle = Math.asin((y - y1) / targetDistance);
+		reachableTarget.x = firstCircle.x + (Math.cos(xAngle) * maxReach);
+		reachableTarget.y = firstCircle.y + (Math.sin(yAngle) * maxReach);
 	}
 	reachableTarget.update();
 

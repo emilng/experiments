@@ -1,12 +1,12 @@
 import * as PIXI from 'pixi.js';
 
 class Circle {
-	constructor(app, { x, y, color, draggable, onUpdate }) {
+	constructor(app, { radius, x, y, color, draggable, onUpdate }) {
 		// draw a circle
 		const graphics = new PIXI.Graphics();
 		graphics.beginFill(0xcccccc);
 		graphics.lineStyle(2, color, 1);
-		graphics.drawCircle(40,40, 20);
+		graphics.drawCircle(radius/2,radius/2, radius);
 		graphics.endFill();
 
 		// create a sprite from a circle graphic
