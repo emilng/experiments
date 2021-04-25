@@ -97,7 +97,37 @@ function updateTarget(x, y) {
 	}
 	reachableTarget.update();
 
-	// from end to start
 
-	// from start to end
+  // implementation of Forward And Backward Reaching Inverse Kinematics (FABRIK)
+  while (
+    Math.abs(lastCircle.x - reachableTarget.x) > 3 ||
+    Math.abs(lastCircle.y - reachableTarget.y) > 3) {
+    // from end to start
+    lastCircle.x = reachableTarget.x;
+    lastCircle.y = reachableTarget.y;
+    lastCircle.update();
+    for (let i = circles.length - 2; i >= 0; i--) {
+      updateCircles(i, 1);
+    }
+
+  	// from start to end
+    firstCircle.x = startX;
+    firstCircle.y = startY;
+    firstCircle.update();
+    for (let i = 1; i < circles.length - 1; i++) {
+      updateCircles(i, -1);
+    }
+  }
 }
+
+function updateCircles(i, indexOffset) {
+  let c1 = circles[i];
+  let c2 = circles[i + indexOffset];
+  let hypotenuse = Math.hypot(c1.x - c2.x, c1.y - c2.y);
+  const xAngle = Math.acos((c1.x - c2.x) / hypotenuse);
+  const yAngle = Math.asin((c1.y - c2.y) / hypotenuse);
+  c1.x = c2.x + Math.cos(xAngle) * linkLength;
+  c1.y = c2.y + Math.sin(yAngle) * linkLength;
+  c1.update();
+}
+
