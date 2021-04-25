@@ -1,11 +1,11 @@
 import * as PIXI from 'pixi.js';
 
 class Circle {
-	constructor(app, x, y) {
+	constructor(app, { x, y, color, draggable, onUpdate }) {
 		// draw a circle
 		const graphics = new PIXI.Graphics();
 		graphics.beginFill(0xcccccc);
-		graphics.lineStyle(2, 0xff0000, 1);
+		graphics.lineStyle(2, color, 1);
 		graphics.drawCircle(40,40, 20);
 		graphics.endFill();
 
@@ -14,22 +14,24 @@ class Circle {
 
 		const circle = new PIXI.Sprite(texture);
 
-		// allow sprite to be draggable
-		circle.interactive = true;
-		circle.buttonMode = true;
-
 		// set origin to center
 		circle.anchor.set(0.5);
 
-		// add mouse and touch events for dragging
-		this.onDragStart = this.onDragStart.bind(this);
-		this.onDragEnd = this.onDragEnd.bind(this);
-		this.onDragMove = this.onDragMove.bind(this);
-		circle
-			.on('pointerdown', this.onDragStart)
-			.on('pointerup', this.onDragEnd)
-			.on('pointerupoutside', this.onDragEnd)
-			.on('pointermove', this.onDragMove);
+		if (draggable) {
+			// allow sprite to be draggable
+			circle.interactive = true;
+			circle.buttonMode = true;
+
+			// add mouse and touch events for dragging
+			this.onDragStart = this.onDragStart.bind(this);
+			this.onDragEnd = this.onDragEnd.bind(this);
+			this.onDragMove = this.onDragMove.bind(this);
+			circle
+				.on('pointerdown', this.onDragStart)
+				.on('pointerup', this.onDragEnd)
+				.on('pointerupoutside', this.onDragEnd)
+				.on('pointermove', this.onDragMove);
+		}
 
 		this.circle = circle;
 		this.x = x;
@@ -37,7 +39,7 @@ class Circle {
 
 		app.stage.addChild(circle);
 
-		this.onUpdate = () => {};
+		this.onUpdate = onUpdate;
 		this.update();
 	}
 
