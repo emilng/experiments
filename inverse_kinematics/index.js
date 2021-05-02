@@ -62,7 +62,6 @@ branchLength.addEventListener('input', (event) => {
 	circles.forEach((circle, index) => {
 		circle.y = index * linkLength + startY;
 		circle.update();
-		updateJoint(index, circle.x, circle.y);
 	});
 	updateTarget(target.x, target.y)
 });
@@ -89,35 +88,44 @@ function updateTarget(x, y) {
 	if (targetDistance < maxReach) {
 		reachableTarget.x = x;
 		reachableTarget.y = y;
+
+    // implementation of Forward And Backward Reaching Inverse Kinematics (FABRIK)
+    while (
+      Math.abs(lastCircle.x - reachableTarget.x) > 2 ||
+      Math.abs(lastCircle.y - reachableTarget.y) > 2) {
+      // from end to start
+      lastCircle.x = reachableTarget.x;
+      lastCircle.y = reachableTarget.y;
+      lastCircle.update();
+      for (let i = circles.length - 2; i >= 0; i--) {
+        updateCircles(i, 1);
+      }
+
+    	// from start to end
+      firstCircle.x = startX;
+      firstCircle.y = startY;
+      firstCircle.update();
+      for (let i = 1; i < circles.length - 1; i++) {
+        updateCircles(i, -1);
+      }
+    }
+
 	} else {
 		const xAngle = Math.acos((x - x1) / targetDistance);
     const yAngle = Math.asin((y - y1) / targetDistance);
-		reachableTarget.x = firstCircle.x + (Math.cos(xAngle) * maxReach);
-		reachableTarget.y = firstCircle.y + (Math.sin(yAngle) * maxReach);
+    circles.forEach((circle, index) => {
+      if (index > 0) {
+        circle.x = firstCircle.x + (Math.cos(xAngle) * index * linkLength);
+        circle.y = firstCircle.y + (Math.sin(yAngle) * index * linkLength);
+        circle.update();
+      }
+    });
+    reachableTarget.x = lastCircle.x;
+    reachableTarget.y = lastCircle.y;
 	}
 	reachableTarget.update();
 
 
-  // implementation of Forward And Backward Reaching Inverse Kinematics (FABRIK)
-  while (
-    Math.abs(lastCircle.x - reachableTarget.x) > 3 ||
-    Math.abs(lastCircle.y - reachableTarget.y) > 3) {
-    // from end to start
-    lastCircle.x = reachableTarget.x;
-    lastCircle.y = reachableTarget.y;
-    lastCircle.update();
-    for (let i = circles.length - 2; i >= 0; i--) {
-      updateCircles(i, 1);
-    }
-
-  	// from start to end
-    firstCircle.x = startX;
-    firstCircle.y = startY;
-    firstCircle.update();
-    for (let i = 1; i < circles.length - 1; i++) {
-      updateCircles(i, -1);
-    }
-  }
 }
 
 function updateCircles(i, indexOffset) {
