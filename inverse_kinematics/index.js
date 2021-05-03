@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import Circle from './circle.js';
 import Line from './line.js';
+import IK from './ik.js';
 
 let linkLength = 50;
 const branchLength = document.getElementById('branchLength');
@@ -17,14 +18,8 @@ const joints = 5;
 const circles = [];
 const lines = [];
 
-const target = new Circle(app, {
-  radius: circleRadius,
-	x: startX,
-	y: ((joints - 1) * linkLength) + startY + 50,
-	color: 0xff0000,
-	draggable: true,
-	onUpdate() {},
-});
+let ik;
+
 
 // create joints
 for (let i = 0; i < joints; i++) {
@@ -38,14 +33,16 @@ for (let i = 0; i < joints; i++) {
 	}));
 }
 
-const reachableTarget = new Circle(app, {
+const target = new Circle(app, {
   radius: circleRadius,
 	x: startX,
-	y: ((joints - 1) * linkLength) + startY,
+	y: ((joints - 1) * linkLength) + startY + 50,
 	color: 0x0000ff,
-	draggable: false,
+	draggable: true,
 	onUpdate() {},
 });
+
+updateIK();
 
 // create lines and connect them to joint positions
 for (let i = 0; i < (circles.length - 1); i++) {
@@ -60,9 +57,11 @@ circles.forEach((circle, index) => {
 branchLength.addEventListener('input', (event) => {
 	linkLength = parseInt(event.target.value, 10);
 	circles.forEach((circle, index) => {
+    circle.x = startX;
 		circle.y = index * linkLength + startY;
 		circle.update();
 	});
+  updateIK();
 	updateTarget(target.x, target.y)
 });
 
@@ -79,63 +78,17 @@ function updateJoint(index, x, y) {
 target.onUpdate = updateTarget;
 
 function updateTarget(x, y) {
-	const firstCircle = circles[0];
-	const lastCircle = circles[circles.length - 1];
-	const x1 = firstCircle.x;
-	const y1 = firstCircle.y;
-	const maxReach = linkLength * (circles.length - 1);
-	const targetDistance = Math.hypot(x - x1, y - y1);
-	if (targetDistance < maxReach) {
-		reachableTarget.x = x;
-		reachableTarget.y = y;
-
-    // implementation of Forward And Backward Reaching Inverse Kinematics (FABRIK)
-    while (
-      Math.abs(lastCircle.x - reachableTarget.x) > 2 ||
-      Math.abs(lastCircle.y - reachableTarget.y) > 2) {
-      // from end to start
-      lastCircle.x = reachableTarget.x;
-      lastCircle.y = reachableTarget.y;
-      lastCircle.update();
-      for (let i = circles.length - 2; i >= 0; i--) {
-        updateCircles(i, 1);
-      }
-
-    	// from start to end
-      firstCircle.x = startX;
-      firstCircle.y = startY;
-      firstCircle.update();
-      for (let i = 1; i < circles.length - 1; i++) {
-        updateCircles(i, -1);
-      }
-    }
-
-	} else {
-		const xAngle = Math.acos((x - x1) / targetDistance);
-    const yAngle = Math.asin((y - y1) / targetDistance);
-    circles.forEach((circle, index) => {
-      if (index > 0) {
-        circle.x = firstCircle.x + (Math.cos(xAngle) * index * linkLength);
-        circle.y = firstCircle.y + (Math.sin(yAngle) * index * linkLength);
-        circle.update();
-      }
-    });
-    reachableTarget.x = lastCircle.x;
-    reachableTarget.y = lastCircle.y;
-	}
-	reachableTarget.update();
-
-
+  ik.updateTarget(x, y);
+  circles.forEach((circle, index) => {
+    circle.x = ik.points[index].x;
+    circle.y = ik.points[index].y;
+    circle.update();
+  });
 }
 
-function updateCircles(i, indexOffset) {
-  let c1 = circles[i];
-  let c2 = circles[i + indexOffset];
-  let hypotenuse = Math.hypot(c1.x - c2.x, c1.y - c2.y);
-  const xAngle = Math.acos((c1.x - c2.x) / hypotenuse);
-  const yAngle = Math.asin((c1.y - c2.y) / hypotenuse);
-  c1.x = c2.x + Math.cos(xAngle) * linkLength;
-  c1.y = c2.y + Math.sin(yAngle) * linkLength;
-  c1.update();
+function updateIK() {
+  const points = circles.map((circle) => {
+    return { x: circle.x, y: circle.y };
+  });
+  ik = new IK(points);
 }
-
