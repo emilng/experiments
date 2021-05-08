@@ -3,9 +3,13 @@ import Circle from './circle.js';
 import Line from './line.js';
 import IK from './ik.js';
 
-let linkLength = 50;
-const branchLength = document.getElementById('branchLength');
-branchLength.value = linkLength;
+let linkLength = 40;
+const linkLengthInput = document.getElementById('linkLength');
+linkLengthInput.value = linkLength;
+let jointCount = 6;
+const jointCountInput = document.getElementById('jointCount');
+jointCountInput.value = jointCount;
+
 
 const app = new PIXI.Application({ backgroundColor: 0xbbbbbb });
 const viewport = document.getElementById('viewport');
@@ -15,14 +19,14 @@ const circleRadius = 10;
 const startX = 400;
 const startY = 300;
 const joints = 5;
-const circles = [];
-const lines = [];
+let circles = [];
+let lines = [];
 
 let ik;
 
 
 // create joints
-for (let i = 0; i < joints; i++) {
+for (let i = 0; i < jointCount; i++) {
 	circles.push(new Circle(app, {
     radius: circleRadius,
 		x: startX,
@@ -54,7 +58,7 @@ circles.forEach((circle, index) => {
 });
 
 // update joint and lines positions when length is updated
-branchLength.addEventListener('input', (event) => {
+linkLengthInput.addEventListener('input', (event) => {
 	linkLength = parseInt(event.target.value, 10);
 	circles.forEach((circle, index) => {
     circle.x = startX;
@@ -63,6 +67,44 @@ branchLength.addEventListener('input', (event) => {
 	});
   updateIK();
 	updateTarget(target.x, target.y)
+});
+
+// update joint and lines positions when joint count is updated
+jointCountInput.addEventListener('input', (event) => {
+  jointCount = parseInt(event.target.value, 10);
+  const previousCirclePoints = [];
+  circles.forEach((circle) => {
+    previousCirclePoints.push({ x: circle.x, y: circle.y });
+    circle.destroy();
+  });
+  lines.forEach((line) => {
+    line.destroy();
+  });
+  circles = [];
+  lines = [];
+
+  for (let i = 0; i < jointCount; i++) {
+    circles.push(new Circle(app, {
+      radius: circleRadius,
+      x: startX,
+      y: i * linkLength + startY,
+      draggable: false,
+      color: 0x555555,
+      onUpdate() {},
+    }));
+  }
+
+  // create lines and connect them to joint positions
+  for (let i = 0; i < (circles.length - 1); i++) {
+    lines.push(new Line(app, 0, 0, 0, 0));
+  }
+  circles.forEach((circle, index) => {
+    circle.onUpdate = updateJoint.bind(this, index);
+    updateJoint(index, circle.x, circle.y);
+  });
+
+  updateIK();
+  updateTarget(target.x, target.y);
 });
 
 // update line positions based on joint position

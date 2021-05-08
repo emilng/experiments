@@ -2,6 +2,8 @@ import * as PIXI from 'pixi.js';
 
 class Circle {
 	constructor(app, { radius, x, y, color, draggable, onUpdate }) {
+		this.app = app;
+
 		// draw a circle
 		const graphics = new PIXI.Graphics();
 		graphics.beginFill(0xcccccc);
@@ -41,6 +43,10 @@ class Circle {
 
 		this.onUpdate = onUpdate;
 		this.update();
+	}
+
+	destroy() {
+		this.app.stage.removeChild(this.circle);
 	}
 
 	update() {

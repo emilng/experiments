@@ -2,6 +2,8 @@ import * as PIXI from 'pixi.js';
 
 class Line {
 	constructor(app, x1, y1, x2, y2) {
+		this.app = app;
+
 		const line = new PIXI.Graphics();
 		line.lineStyle(2, 0xff0000, 1);
 		this.line = line;
@@ -13,6 +15,10 @@ class Line {
 		app.stage.addChild(line);
 
 		this.update();
+	}
+
+	destroy() {
+		this.app.stage.removeChild(this.line);
 	}
 
 	updateStart(x1, y1) {
