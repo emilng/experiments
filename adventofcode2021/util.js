@@ -15,3 +15,13 @@ const outputBinaryBlock = (num, width, height) => {
   }
   console.log('');
 }
+
+const outputNumberGrid = (grid) => {
+  console.log('');
+  grid.forEach(line => {
+    console.log(line.join(''));
+  });
+  console.log('');
+}
+
+module.exports = { outputBinaryBlock, outputNumberGrid };
