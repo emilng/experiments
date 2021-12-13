@@ -16,7 +16,7 @@ const outputBinaryBlock = (num, width, height) => {
   console.log('');
 }
 
-const outputNumberGrid = (grid) => {
+const outputGrid = (grid) => {
   console.log('');
   grid.forEach(line => {
     console.log(line.join(''));
@@ -24,4 +24,4 @@ const outputNumberGrid = (grid) => {
   console.log('');
 }
 
-module.exports = { outputBinaryBlock, outputNumberGrid };
+module.exports = { outputBinaryBlock, outputGrid };
