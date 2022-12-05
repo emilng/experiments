@@ -1,0 +1,24 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "description": "ui experiments",
+  "main": "index.js",
+  "scripts": {
+    "build": "snowpack build",
+    "start": "snowpack dev --polyfill-node",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emilng/experiments.git"
+  },
+  "author": "Emil Ng",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/emilng/experiments/issues"
+  },
+  "homepage": "https://github.com/emilng/experiments#readme",
+  "devDependencies": {
+    "snowpack": "^3.0.13"
+  }
+}
